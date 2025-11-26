@@ -21,13 +21,13 @@ def build_line(seq, NT=1):
 # replace horizontal BPM elements (DRIFTS) with BeamPositionMonitor instances
     for name, element in line_l.element_dict.items():
         if(name.find("hbpm")>-1):
-            new_el = xt.BeamPositionMonitor(start_at_turn=0, stop_at_turn=NT, )
+            new_el = xt.BeamPositionMonitor(start_at_turn=0, stop_at_turn=NT)
             line_l.element_dict[name]=new_el
     line_l.build_tracker()
     return line_l
 
 # %%
-Npart=100
+Npart=1000
 N_turn = 10
 frev=5.9e5
 
@@ -43,7 +43,7 @@ for name,s in zip(names,s_positions):
         sbpms[name]=s
 
 # %%
-sh_list=[0.0, -1.0, 1.0]  #array of quad shifts in mm to loop
+sh_list=[0.0, -1.0, 1.0, 1.0]  #array of quad shifts in mm to loop
 kick_data=[]                # BPM traces for each quad shift
 
 # start loop over different quad shifts here
@@ -56,7 +56,7 @@ for sh in sh_list:
     line.element_dict["q105_"].shift_x = sh*0.001
 # create reference orbit, generate the beam along the orbit, track it
     line.particle_ref = xt.Particles(q0=1, mass0=xt.PROTON_MASS_EV, p0c=8.89e9)
-    x_gen = np.random.normal(loc=0.0, scale=0.001, size=Npart)
+    x_gen = np.random.normal(loc=0.0, scale=0.0001, size=Npart)
     particles = line.build_particles(x=x_gen, px=0, y=0, py=0, zeta=0, delta=0)
     line.track(particles, num_turns=N_turn)
 
@@ -65,7 +65,7 @@ for sh in sh_list:
     for bname,s in sbpms.items():
         bpmX = line.element_dict[bname]
         xcords=bpmX.x_sum/Npart    # array of averages over Npart particles for this BPM
-        turnsx1.append(xcords[0])  # coordinate at bpm bname on first turn
+        turnsx1.append(xcords[0])  # build the coordinate vector on first turn
     kick_data.append(turnsx1)   # record first turn for quad shift sh
 
 fig, axs = plt.subplots(nrows=2, ncols=2, figsize=(10, 8))
@@ -91,11 +91,11 @@ axs[1, 0].set_xlabel('X-axis')
 axs[1, 0].set_ylim(-0.005,0.005)
 axs[1, 0].set_ylabel('Y-axis')
 
-#First turn orbit for Quad shift #3, zoomed
-axs[1,1].plot(turnss, kick_data[2], color='red',linestyle='--',label=str(sh_list[2]))
-axs[1, 1].set_title(f"Shift ={sh_list[2]} zoomed in")
+#First turn orbit for Quad shift #4
+axs[1,1].plot(turnss, kick_data[3], color='red',linestyle='--',label=str(sh_list[3]))
+axs[1, 1].set_title(f"Shift ={sh_list[3]} zoomed in")
 axs[1, 1].set_xlabel('X-axis')
-axs[1, 1].set_ylim(-0.001,0.001)
+axs[1, 1].set_ylim(-0.005,0.005)
 axs[1, 1].set_ylabel('Y-axis')
 
 plt.tight_layout()
